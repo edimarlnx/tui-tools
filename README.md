@@ -1,111 +1,50 @@
-# tui-tools
+# tui-tools has moved to its own organization
 
-> **Status: early, under validation.** Independent tools that follow the
-> Omarchy visual style; they are **not** part of the Omarchy project and not
-> endorsed by its maintainers. Expect rough edges.
+**→ [github.com/tui-tools](https://github.com/tui-tools)**
 
-A family of terminal tools for Linux, in the visual style of
-[Omarchy](https://omarchy.org): the same palette, the same key language and the
-same "show me before you do it" behaviour as lazygit, lazydocker and btop.
+This repository is archived. It was the monorepo the family started in; each
+tool now lives in its own repository, with its own releases and its own issue
+tracker.
 
-Every tool is a **single static binary**, works on Debian/Ubuntu and Arch, and
-runs **no daemon**. Nothing is installed in the background, nothing keeps
-running after you quit.
+| Was here | Is now |
+| --- | --- |
+| `cmd/fwall` | [**tui-firewall**](https://github.com/tui-tools/tui-firewall) — the system firewall |
+| `pkg/theme`, `pkg/ui`, `internal/config` | [**tui-kit**](https://github.com/tui-tools/tui-kit) — the shared foundation |
+| — | [**tui-systemd**](https://github.com/tui-tools/tui-systemd) — systemd units, journal, timers |
+| — | [**tui-template**](https://github.com/tui-tools/tui-template) — a starting point for a new tool |
 
-![fwall](docs/screenshots/fwall-main.png)
+The git history came across: `tui-firewall` and `tui-kit` carry the commits
+that produced the files they inherited, so `git log --follow` reaches back
+through this repository's history.
 
-## Tools
+## Why the split, and why the rename
 
-| Tool | What it does | Status |
-| --- | --- | --- |
-| [`fwall`](cmd/fwall/README.md) | Manage the system firewall (ufw today, firewalld planned) | v0.1 |
+One repository meant one release train and one issue tracker for tools that
+have nothing to do with each other beyond looking alike. A firewall UI and a
+systemd UI share a palette and a promise, not a version number.
 
-## Install
+`fwall` became `tui-firewall` at the same time. The family rule is now one name
+per tool — `tui-<target>` for the repository, the Go module, the binary and the
+config directory, with no aliases — and it was better to pay that cost at v0.1
+than to leave one tool spelled differently from all the others.
 
-Grab a binary from the releases page, or build it yourself:
+Note that the configuration directory moved with the name: `/etc/fwall/` and
+`~/.config/fwall/` are now `/etc/tui-firewall/` and `~/.config/tui-firewall/`.
 
-```sh
-git clone https://github.com/edimarlnx/tui-tools
-cd tui-tools
-make build          # binaries land in ./bin
-sudo install -m0755 bin/fwall /usr/local/bin/fwall
-```
-
-Try any tool without touching your system:
-
-```sh
-make demo           # fwall against an in-memory sample firewall
-```
-
-## Design rules
-
-These hold for every tool in the repo.
-
-- **Preview, then confirm.** No tool ever changes the system without first
-  showing the exact command line it is about to run. The confirm dialog is the
-  only path to a mutation.
-- **Read-only by default.** Starting a tool only reads state.
-- **No daemon, no state of its own.** The system is the source of truth; the
-  tools re-read it after every change.
-- **Backend-agnostic core.** The UI talks to an interface, never to a specific
-  CLI. That is what lets `fwall` grow a firewalld backend without touching the
-  screens.
-- **Responsive.** Layouts adapt from a 40-column pane to a full screen.
-
-## Theme
-
-Every tool draws from `pkg/theme`, so they all look alike.
-
-The default palette is **Tokyo Night**. If you run Omarchy, the tools read the
-active desktop theme from `~/.config/omarchy/current/theme/colors.toml` and
-follow it, so switching your desktop theme switches the tools too. Any
-Omarchy-format `colors.toml` works.
-
-Precedence:
-
-1. `TUI_THEME=/path/to/colors.toml` (or a tool's `--theme` flag);
-2. the active Omarchy theme, when that file exists;
-3. the built-in Tokyo Night palette.
-
-`NO_COLOR=1` is respected: layout, borders and emphasis stay, colors go away.
-
-## Repository layout
-
-```
-cmd/<tool>/       one directory per binary
-internal/         backends and domain logic, not importable from outside
-pkg/theme/        shared palette and Lip Gloss styles
-pkg/ui/           shared widgets: header, table, help bar, dialogs, status line
-examples/         sample configuration files
-```
-
-`pkg/` is the shared surface: a new tool imports `pkg/theme` and `pkg/ui` and
-inherits the whole look and key language for free.
-
-## Development
+## Installing
 
 ```sh
-make check        # gofmt, go vet and the tests: what CI runs
-make test
-make build
-make demo
+go install github.com/tui-tools/tui-firewall/cmd/tui-firewall@latest
 ```
 
-Dependencies are kept deliberately small: Bubble Tea, Bubbles and Lip Gloss,
-nothing else. Configuration and theme files are parsed with a small purpose-made
-reader rather than a TOML library.
+Or download a static binary from the
+[releases](https://github.com/tui-tools/tui-firewall/releases).
 
-## Releases
+## The code below
 
-Each tool is released on its own tag, prefixed with the tool name:
-
-```sh
-git tag fwall/v0.1.0
-git push origin fwall/v0.1.0
-```
-
-GoReleaser builds static `linux/amd64` and `linux/arm64` binaries
-(`CGO_ENABLED=0`) for that tool only.
+Everything under this line is kept exactly as it was, for history. It is not
+maintained, and the Go module path (`github.com/edimarlnx/tui-tools`) no longer
+resolves to anything you should depend on.
 
 ## License
 
